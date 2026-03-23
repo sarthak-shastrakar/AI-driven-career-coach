@@ -132,6 +132,9 @@ export default function ResumeBuilder({ initialContent }) {
       const element = document.getElementById("resume-pdf");
       if (!element) throw new Error("Resume element not found");
 
+      // Small delay to ensure styles are applied
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
       // 👇 load html2pdf only in the browser
       const html2pdf = (await import("html2pdf.js")).default;
 
@@ -139,13 +142,54 @@ export default function ResumeBuilder({ initialContent }) {
         margin: [15, 15],
         filename: "resume.pdf",
         image: { type: "jpeg", quality: 0.98 },
-        html2canvas: { scale: 2 },
+        html2canvas: {
+          scale: 2,
+          useCORS: true,
+          allowTaint: true,
+          letterRendering: true,
+          logging: true,
+          windowWidth: 1200,
+          onclone: (clonedDoc) => {
+            const pdfElement = clonedDoc.getElementById("resume-pdf");
+            if (pdfElement) {
+              pdfElement.style.setProperty("--background", "#ffffff", "important");
+              pdfElement.style.setProperty("--foreground", "#000000", "important");
+              pdfElement.style.setProperty("--primary", "#000000", "important");
+              pdfElement.style.setProperty("--secondary", "#f8fafc", "important");
+              pdfElement.style.setProperty("--muted", "#f1f5f9", "important");
+              pdfElement.style.setProperty("--muted-foreground", "#64748b", "important");
+              pdfElement.style.setProperty("--accent", "#f1f5f9", "important");
+              pdfElement.style.setProperty("--border", "#e2e8f0", "important");
+              pdfElement.style.setProperty("--card", "#ffffff", "important");
+              pdfElement.style.setProperty("--popover", "#ffffff", "important");
+              pdfElement.style.setProperty("--ring", "#000000", "important");
+              pdfElement.style.setProperty("--input", "#e2e8f0", "important");
+
+              // Force all text to black if it uses oklch/lab
+              const elements = pdfElement.querySelectorAll("*");
+              elements.forEach((el) => {
+                const style = window.getComputedStyle(el);
+                if (style.color.includes("oklch") || style.color.includes("lab")) {
+                  el.style.color = "#000000";
+                }
+                if (style.backgroundColor.includes("oklch") || style.backgroundColor.includes("lab")) {
+                  el.style.backgroundColor = "transparent";
+                }
+                if (style.borderColor.includes("oklch") || style.borderColor.includes("lab")) {
+                  el.style.borderColor = "#e2e8f0";
+                }
+              });
+            }
+          },
+        },
         jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
       };
 
       await html2pdf().set(opt).from(element).save();
+      toast.success("Resume downloaded successfully!");
     } catch (error) {
       console.error("PDF generation error:", error);
+      toast.error("Failed to generate PDF. Please try again.");
     } finally {
       setIsGenerating(false);
     }
@@ -399,8 +443,8 @@ export default function ResumeBuilder({ initialContent }) {
               preview={resumeMode}
             />
           </div>
-          <div className="hidden">
-            <div id="resume-pdf">
+          <div className="absolute opacity-0 pointer-events-none -z-10">
+            <div id="resume-pdf" className="bg-white p-8 w-[210mm] min-h-[297mm]">
               <MDEditor.Markdown
                 source={previewContent}
                 style={{

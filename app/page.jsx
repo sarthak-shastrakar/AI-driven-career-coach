@@ -7,7 +7,7 @@ import { ArrowRight } from "lucide-react";
 import { howItWorks } from "@/data/howItWorks.js";
 import { testimonial } from "@/data/testimonial.js";
 import { faqs } from "@/data/faqs.js";
-import "../styles/animations.css";
+// import "../styles/animations.css";
 import {
   Card,
   CardAction,

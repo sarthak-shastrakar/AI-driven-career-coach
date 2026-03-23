@@ -112,6 +112,7 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -119,4 +120,41 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* PDF Generation Overrides */
+#resume-pdf {
+  --background: #ffffff !important;
+  --foreground: #000000 !important;
+  --primary: #000000 !important;
+  --secondary: #f8fafc !important;
+  --muted: #f1f5f9 !important;
+  --muted-foreground: #64748b !important;
+  --accent: #f1f5f9 !important;
+  --border: #e2e8f0 !important;
+  --card: #ffffff !important;
+  --popover: #ffffff !important;
+  --ring: #000000 !important;
+  --input: #e2e8f0 !important;
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  width: 210mm !important;
+}
+
+#resume-pdf * {
+  border-color: #e2e8f0 !important;
+  outline-color: transparent !important;
+  background-color: transparent !important;
+  color: inherit !important;
+}
+
+#resume-pdf h1, 
+#resume-pdf h2, 
+#resume-pdf h3 {
+  color: #000000 !important;
+}
+
+#resume-pdf a {
+  color: #2563eb !important;
+  text-decoration: underline !important;
 }

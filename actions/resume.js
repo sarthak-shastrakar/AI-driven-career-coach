@@ -3,18 +3,16 @@
 import { db } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import OpenAI from "openai";
+import { checkUser } from "@/lib/checkUser";
 
-const genAI = new GoogleGenerativeAI(process.env.GENERATIVE_AI_KEY);
-const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
+const client = new OpenAI({
+  apiKey: process.env.OPENROUTER_API_KEY,
+  baseURL: "https://openrouter.ai/api/v1",
+});
 
 export async function saveResume(content) {
-  const { userId } = await auth();
-  if (!userId) throw new Error("Unauthorized");
-
-  const user = await db.user.findUnique({
-    where: { clerkUserId: userId },
-  });
+  const user = await checkUser();
 
   if (!user) throw new Error("User not found");
 
@@ -41,14 +39,9 @@ export async function saveResume(content) {
 }
 
 export async function getResume() {
-  const { userId } = await auth();
-  if (!userId) throw new Error("Unauthorized");
+  const user = await checkUser();
 
-  const user = await db.user.findUnique({
-    where: { clerkUserId: userId },
-  });
-
-  if (!user) throw new Error("User not found");
+  if (!user) return null;
 
   return await db.resume.findUnique({
     where: {
@@ -58,15 +51,7 @@ export async function getResume() {
 }
 
 export async function improveWithAI({ current, type }) {
-  const { userId } = await auth();
-  if (!userId) throw new Error("Unauthorized");
-
-  const user = await db.user.findUnique({
-    where: { clerkUserId: userId },
-    include: {
-      industryInsight: true,
-    },
-  });
+  const user = await checkUser();
 
   if (!user) throw new Error("User not found");
 
@@ -87,9 +72,17 @@ export async function improveWithAI({ current, type }) {
   `;
 
   try {
-    const result = await model.generateContent(prompt);
-    const response = result.response;
-    const improvedContent = response.text().trim();
+    const result = await client.chat.completions.create({
+      model: "openrouter/auto",
+      messages: [
+        {
+          role: "user",
+          content: prompt,
+        },
+      ],
+    });
+    console.log(result.usage)
+    const improvedContent = result.choices[0].message.content.trim();
     return improvedContent;
   } catch (error) {
     console.error("Error improving content:", error);
