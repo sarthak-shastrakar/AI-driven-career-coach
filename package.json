@@ -5,10 +5,7 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
-    "start": "next start",
-    "postinstall": "prisma generate",
-    "vercel-build": "prisma generate && prisma migrate deploy && next build",
-    "lint": "eslint"
+    "start": "next start"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.31.8",
