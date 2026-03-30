@@ -136,7 +136,11 @@ export default function ResumeBuilder({ initialContent }) {
       await new Promise((resolve) => setTimeout(resolve, 500));
 
       // 👇 load html2pdf only in the browser
-      const html2pdf = (await import("html2pdf.js")).default;
+      console.log("Loading html2pdf...");
+      const html2pdfModule = await import("html2pdf.js");
+      const html2pdf = html2pdfModule.default || html2pdfModule;
+
+      console.log("Starting PDF generation...");
 
       const opt = {
         margin: [15, 15],
@@ -150,41 +154,45 @@ export default function ResumeBuilder({ initialContent }) {
           logging: true,
           windowWidth: 1200,
           onclone: (clonedDoc) => {
+            // Remove all problematic colors from stylesheets to prevent html2canvas from crashing
+            const stylesheets = clonedDoc.querySelectorAll("style");
+            stylesheets.forEach((sheet) => {
+              if (sheet.innerHTML.includes("lab(") || sheet.innerHTML.includes("oklch(")) {
+                sheet.innerHTML = sheet.innerHTML
+                  .replace(/lab\([^)]+\)/g, "#000000")
+                  .replace(/oklch\([^)]+\)/g, "#000000");
+              }
+            });
+
             const pdfElement = clonedDoc.getElementById("resume-pdf");
             if (pdfElement) {
-              pdfElement.style.setProperty("--background", "#ffffff", "important");
-              pdfElement.style.setProperty("--foreground", "#000000", "important");
-              pdfElement.style.setProperty("--primary", "#000000", "important");
-              pdfElement.style.setProperty("--secondary", "#f8fafc", "important");
-              pdfElement.style.setProperty("--muted", "#f1f5f9", "important");
-              pdfElement.style.setProperty("--muted-foreground", "#64748b", "important");
-              pdfElement.style.setProperty("--accent", "#f1f5f9", "important");
-              pdfElement.style.setProperty("--border", "#e2e8f0", "important");
-              pdfElement.style.setProperty("--card", "#ffffff", "important");
-              pdfElement.style.setProperty("--popover", "#ffffff", "important");
-              pdfElement.style.setProperty("--ring", "#000000", "important");
-              pdfElement.style.setProperty("--input", "#e2e8f0", "important");
-
-              // Force all text to black if it uses oklch/lab
-              const elements = pdfElement.querySelectorAll("*");
-              elements.forEach((el) => {
-                const style = window.getComputedStyle(el);
-                if (style.color.includes("oklch") || style.color.includes("lab")) {
-                  el.style.color = "#000000";
+              // Apply basic styles to the container
+              pdfElement.style.background = "#ffffff";
+              pdfElement.style.color = "#000000";
+              
+              // Add a style tag to the cloned document to force black text and handle modern color formats
+              const style = clonedDoc.createElement("style");
+              style.innerHTML = `
+                #resume-pdf * {
+                  color: #000000 !important;
+                  background-color: transparent !important;
+                  border-color: #e2e8f0 !important;
+                  box-shadow: none !important;
+                  text-shadow: none !important;
                 }
-                if (style.backgroundColor.includes("oklch") || style.backgroundColor.includes("lab")) {
-                  el.style.backgroundColor = "transparent";
+                #resume-pdf {
+                  background-color: #ffffff !important;
+                  color: #000000 !important;
                 }
-                if (style.borderColor.includes("oklch") || style.borderColor.includes("lab")) {
-                  el.style.borderColor = "#e2e8f0";
-                }
-              });
+              `;
+              clonedDoc.head.appendChild(style);
             }
           },
         },
         jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
       };
 
+      console.log("Saving PDF...");
       await html2pdf().set(opt).from(element).save();
       toast.success("Resume downloaded successfully!");
     } catch (error) {
@@ -290,7 +298,7 @@ export default function ResumeBuilder({ initialContent }) {
                     Github Profile
                   </label>
                   <Input
-                    {...register("contactInfo.twitter")}
+                    {...register("contactInfo.github")}
                     type="url"
                     placeholder="https://github.com/your-handle"
                   />
@@ -430,7 +438,7 @@ export default function ResumeBuilder({ initialContent }) {
             <div className="flex p-3 gap-2 items-center border-2 border-yellow-600 text-yellow-600 rounded mb-2">
               <AlertTriangle className="h-5 w-5" />
               <span className="text-sm">
-                You will lose editied markdown if you update the form data.
+                You will lose edited markdown if you update the form data.
               </span>
             </div>
           )}
@@ -443,19 +451,21 @@ export default function ResumeBuilder({ initialContent }) {
               preview={resumeMode}
             />
           </div>
-          <div className="absolute opacity-0 pointer-events-none -z-10">
-            <div id="resume-pdf" className="bg-white p-8 w-[210mm] min-h-[297mm]">
-              <MDEditor.Markdown
-                source={previewContent}
-                style={{
-                  background: "white",
-                  color: "black",
-                }}
-              />
-            </div>
-          </div>
         </TabsContent>
       </Tabs>
+
+      {/* Hidden PDF container - always in DOM but out of view */}
+      <div className="absolute left-[-9999px] top-0 pointer-events-none -z-50">
+        <div id="resume-pdf" className="bg-white p-8 w-[210mm] min-h-[297mm]">
+          <MDEditor.Markdown
+            source={previewContent}
+            style={{
+              background: "white",
+              color: "black",
+            }}
+          />
+        </div>
+      </div>
     </div>
   );
 }

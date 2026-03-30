@@ -79,37 +79,122 @@
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
+  --background: oklch(0.1 0 0);
   --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
+  --card: oklch(0.12 0.015 250 / 40%);
   --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
+  --popover: oklch(0.12 0.015 250);
   --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
+  --primary: oklch(0.6 0.18 280);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.2 0.01 250);
   --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
+  --muted: oklch(0.2 0.01 250);
+  --muted-foreground: oklch(0.6 0 0);
+  --accent: oklch(0.25 0.05 280);
   --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
+  --destructive: oklch(0.6 0.2 25);
+  --border: oklch(1 0 0 / 8%);
+  --input: oklch(1 0 0 / 12%);
+  --ring: oklch(0.6 0.18 280);
+  --chart-1: oklch(0.6 0.18 280);
+  --chart-2: oklch(0.7 0.15 160);
+  --chart-3: oklch(0.75 0.15 70);
+  --chart-4: oklch(0.65 0.2 300);
+  --chart-5: oklch(0.65 0.2 20);
+  --sidebar: oklch(0.1 0.01 250);
   --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary: oklch(0.6 0.18 280);
   --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent: oklch(0.15 0.05 250);
   --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --sidebar-border: oklch(1 0 0 / 8%);
+  --sidebar-ring: oklch(0.6 0.18 280);
+}
+
+.glass {
+  @apply bg-card/40 backdrop-blur-[20px] border border-white/10 shadow-2xl;
+}
+
+.glass-dark {
+  @apply bg-black/50 backdrop-blur-[30px] border border-white/5 shadow-2xl;
+}
+
+@keyframes mesh {
+  0% { transform: translate(0,0) scale(1); }
+  33% { transform: translate(30px,-50px) scale(1.1); }
+  66% { transform: translate(-20px,20px) scale(0.9); }
+  100% { transform: translate(0,0) scale(1); }
+}
+
+.animate-mesh {
+  animation: mesh 20s ease-in-out infinite;
+}
+
+@keyframes shimmer-slow {
+  0% { transform: translateX(-100%) skewX(-20deg); }
+  100% { transform: translateX(200%) skewX(-20deg); }
+}
+
+.animate-shimmer-slow {
+  animation: shimmer-slow 8s infinite linear;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { border-color: oklch(0.6 0.18 280 / 20%); box-shadow: 0 0 20px -5px oklch(0.6 0.18 280 / 0%); }
+  50% { border-color: oklch(0.6 0.18 280 / 60%); box-shadow: 0 0 30px -5px oklch(0.6 0.18 280 / 40%); }
+}
+
+.btn-premium-glow {
+  @apply relative overflow-hidden transition-all duration-500 border border-primary/20 bg-primary text-white;
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+
+.btn-premium-glow::before {
+  content: "";
+  @apply absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-[-30deg] translate-x-[-200%];
+  transition: transform 0.8s ease-in-out;
+}
+
+.btn-premium-glow:hover::before {
+  @apply translate-x-[200%];
+}
+
+.card-premium {
+  @apply bg-gradient-to-br from-white/5 to-transparent backdrop-blur-xl border border-white/[0.08] shadow-2xl transition-all duration-300;
+}
+
+/* Fluid Typography & Optical Tuning */
+.heading-tight {
+  @apply tracking-[-0.05em] leading-[0.9] font-black;
+}
+
+.text-fluid-lg {
+  font-size: clamp(2.5rem, 8vw, 6rem);
+}
+
+::selection {
+  background-color: oklch(0.6 0.18 280 / 30%);
+  color: oklch(0.985 0 0);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: oklch(0.1 0 0);
+}
+
+::-webkit-scrollbar-thumb {
+  background: oklch(0.2 0.01 250);
+  border-radius: 5px;
+  border: 3px solid oklch(0.1 0 0);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: oklch(0.6 0.18 280 / 40%);
 }
 
 
@@ -154,7 +239,22 @@
   color: #000000 !important;
 }
 
-#resume-pdf a {
-  color: #2563eb !important;
-  text-decoration: underline !important;
+
+/* Premium Animations */
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.animate-shimmer {
+  animation: shimmer 3s infinite linear;
+}
+
+.cta-glow {
+  box-shadow: 0 0 20px 2px rgba(var(--primary), 0.15);
+  transition: box-shadow 0.3s ease;
+}
+
+.cta-glow:hover {
+  box-shadow: 0 0 40px 5px rgba(var(--primary), 0.3);
 }

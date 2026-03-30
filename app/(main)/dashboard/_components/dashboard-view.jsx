@@ -185,19 +185,19 @@ const DashboardView = ({ insights }) => {
       </Card>
 
       {/* Industry Trends */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <Card>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card className="glass shadow-lg">
           <CardHeader>
-            <CardTitle>Key Industry Trends</CardTitle>
+            <CardTitle className="text-xl font-bold">Key Industry Trends</CardTitle>
             <CardDescription>
-              Current trends shaping the industry
+              Current forces shaping the market landscape
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <ul className="space-y-4 flex flex-wrap space-x-8">
+            <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {insights.keyTrends.map((trend, index) => (
-                <li key={index} className="flex items-start space-x-2">
-                  <div className="h-2 w-2 mt-2 rounded-full bg-primary" />
+                <li key={index} className="flex items-start gap-3 text-sm text-muted-foreground bg-muted/20 p-3 rounded-xl border border-primary/5">
+                  <div className="h-2 w-2 mt-1.5 rounded-full bg-primary shrink-0" />
                   <span>{trend}</span>
                 </li>
               ))}
@@ -205,15 +205,15 @@ const DashboardView = ({ insights }) => {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="glass shadow-lg">
           <CardHeader>
-            <CardTitle>Recommended Skills</CardTitle>
-            <CardDescription>Skills to consider developing</CardDescription>
+            <CardTitle className="text-xl font-bold">Recommended Skills</CardTitle>
+            <CardDescription>Focus areas for career advancement</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-2">
               {insights.recommendedSkills.map((skill) => (
-                <Badge key={skill} variant="outline">
+                <Badge key={skill} variant="secondary" className="px-3 py-1 bg-primary/10 text-primary border-primary/20">
                   {skill}
                 </Badge>
               ))}

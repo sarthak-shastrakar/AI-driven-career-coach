@@ -1,157 +1,186 @@
 "use client";
-import React from "react";
+
+import React, { useEffect, useRef } from "react";
+import { Button } from "@/components/ui/button";
+import { ArrowRight, Sparkles, Target, Zap } from "lucide-react";
 import Link from "next/link";
-import { Button } from "./ui/button";
 import Image from "next/image";
-import { useEffect, useRef } from "react";
-// import "../styles/dashboard.css";
+import { motion, useInView, useAnimation, useMotionValue, useSpring, useTransform } from "framer-motion";
+
 const Herosection = () => {
   const imageRef = useRef(null);
+  const isInView = useInView(imageRef, { once: true, margin: "-100px" });
+  const controls = useAnimation();
+
+  // Mouse Parallax Logic
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+
+  const springConfig = { stiffness: 100, damping: 30 };
+  const xSpring = useSpring(mouseX, springConfig);
+  const ySpring = useSpring(mouseY, springConfig);
+
+  const rotateX = useTransform(ySpring, [-300, 300], [10, -10]);
+  const rotateY = useTransform(xSpring, [-300, 300], [-10, 10]);
+
+  const statsX = useTransform(xSpring, [-300, 300], [20, -20]);
+  const statsY = useTransform(ySpring, [-300, 300], [20, -20]);
 
   useEffect(() => {
-    const imageElement = imageRef.current;
+    if (isInView) {
+      controls.start("visible");
+    }
 
-    const handleScroll = () => {
-      const scrollPosition = window.scrollY;
-      const scrollThreshold = 200;
-
-      if (scrollPosition > scrollThreshold) {
-        imageElement.classList.add("scrolled");
-      } else {
-        imageElement.classList.remove("scrolled");
-      }
+    const handleMouseMove = (e) => {
+      const { clientX, clientY } = e;
+      const { innerWidth, innerHeight } = window;
+      mouseX.set(clientX - innerWidth / 2);
+      mouseY.set(clientY - innerHeight / 2);
     };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  });
 
-  // particle animation
-  useEffect(() => {
-    document.querySelectorAll(".rain-drop").forEach((drop) => {
-      drop.style.left = `${Math.random() * 100}vw`;
-      drop.style.animationDuration = `${20 + Math.random() * 6}s, ${
-        2 + Math.random() * 2
-      }s`;
-      drop.style.animationDelay = `${Math.random() * -10}s`;
-    });
-  }, []);
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove);
+  }, [isInView, controls, mouseX, mouseY]);
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.15,
+        delayChildren: 0.2,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 30 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        type: "spring",
+        stiffness: 100,
+        damping: 20,
+      },
+    },
+  };
 
   return (
-    <section className="w-full pt-16 pb-32 overflow-hidden">
-      <div className="rain-container">
-        {Array.from({ length: 30 }).map((_, i) => (
-          <span key={i} className="rain-drop"></span>
-        ))}
-      </div>
+    <section className="relative w-full py-24 md:py-40 px-4 overflow-hidden bg-background">
+      {/* Background Decorative Elements */}
+      <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/4 w-[800px] h-[800px] bg-primary/10 blur-[150px] rounded-full -z-10 animate-pulse" />
+      <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/4 w-[600px] h-[600px] bg-primary/5 blur-[120px] rounded-full -z-10" />
 
-      <div className="app-content">
-        {/* Your full page content */}
+      <div className="container mx-auto max-w-7xl">
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          className="flex flex-col items-center text-center space-y-16"
+        >
+          {/* Badge */}
+          <motion.div variants={itemVariants}>
+            <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-md shadow-2xl text-primary text-sm font-black tracking-[0.2em] uppercase">
+              <Sparkles className="h-4 w-4" />
+              The Future of Career Growth
+            </div>
+          </motion.div>
 
-        {/* Your hero / footer content */}
-
-        <div className="text-center space-y-8">
           {/* Heading */}
-          <div className="space-y-4 mx-auto">
-            <h1 className="text-4xl font-bold md:text-6xl lg:text-4xl xl:text-6xl font-inter">
-              <span
-                className="
-            flex justify-center leading-tight
-            animate-in fade-in slide-in-from-bottom-6
-            duration-1000 ease-out
-          "
-              >
-                NextStep AI — Guiding Your Career Journey
-              </span>
-
-              <span
-                className="
-            block mt-3 text-accent text-2xl
-            animate-in fade-in slide-in-from-bottom-4
-            duration-1000 delay-200 ease-out
-          "
-              >
-                Smart career insights, skill growth, and interview prep—tailored
-                for your success
+          <motion.div variants={itemVariants} className="space-y-8 max-w-5xl mx-auto">
+            <h1 className="text-6xl md:text-8xl font-black tracking-tighter leading-[0.95] text-white">
+              Elevate Your Career with
+              <span className="block mt-4 bg-gradient-to-r from-primary via-[#818cf8] to-[#c084fc] bg-clip-text text-transparent">
+                NextStep AI
               </span>
             </h1>
 
-            <p
-              className="
-          mx-auto max-w-[600px] text-muted-foreground
-          animate-in fade-in slide-in-from-bottom-3
-          duration-1000 delay-300 ease-out
-        "
-            >
-              Get tailored recommendations on what skills to learn next, based
-              on your career goals and industry trends. Stay ahead of the
-              competition with focused growth.
+            <p className="mx-auto max-w-[800px] text-lg md:text-2xl text-muted-foreground/80 leading-relaxed tracking-tight pt-2">
+              Master your industry with AI-driven insights, personalized resume
+              building, and real-world interview preparation tailored for the
+              modern professional.
             </p>
-          </div>
+          </motion.div>
 
-          {/* Buttons */}
-          <div
-            className="
-        flex justify-center space-x-4
-        animate-in fade-in slide-in-from-bottom-3
-        duration-1000 delay-500 ease-out
-      "
-          >
-            <Link href="/dashboard">
-              <Button
-                variant="outline"
-                size="lg"
-                className="
-            cursor-pointer
-            transition-all duration-300
-            hover:scale-[1.03] hover:shadow-lg
-            active:scale-[0.97]
-          "
-              >
-                Get Started
-              </Button>
+          {/* Action Buttons */}
+          <motion.div variants={itemVariants} className="flex justify-center w-full pt-4">
+            <Link href="/dashboard" className="w-full sm:w-auto">
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Button
+                  size="lg"
+                  className="btn-premium-glow h-16 px-12 text-xl font-bold rounded-2xl cursor-pointer w-full sm:w-auto"
+                >
+                  Start Journey Free
+                  <ArrowRight className="ml-3 h-6 w-6" />
+                </Button>
+              </motion.div>
             </Link>
+          </motion.div>
 
-            {/* <Link href="">
-              <Button
-                variant="ghost"
-                size="lg"
-                className="
-            cursor-pointer
-            transition-all duration-300
-            hover:scale-[1.03]
-            active:scale-[0.97]
-          "
-              >
-                Home
-              </Button>
-            </Link> */}
-          </div>
-
-          {/* Image */}
-          <div className="hero-image-wrapper mt-8 md:mt-0">
-            <div
-              ref={imageRef}
-              className="
-          hero-image
-          animate-in fade-in slide-in-from-bottom-8
-          duration-1200 delay-700 ease-out
-        "
-            >
-              <Image
-                src="/ai-assistant-1.jpg"
-                width={1020}
-                height={420}
-                className="
-            rounded-lg border mx-auto h-96 shadow-2xl
-            transition-transform duration-500
-            hover:scale-[1.01]
-          "
-                alt="AI-coach Banner"
+          {/* Hero Image Container */}
+          <motion.div
+            ref={imageRef}
+            initial={{ opacity: 0, scale: 0.9, y: 50 }}
+            animate={controls}
+            variants={{
+              visible: {
+                opacity: 1,
+                scale: 1,
+                y: 0,
+                transition: {
+                  duration: 1,
+                  ease: [0.16, 1, 0.3, 1],
+                  delay: 0.6,
+                },
+              },
+            }}
+            style={{ rotateX, rotateY, perspective: 1000 }}
+            className="relative w-full max-w-6xl mx-auto mt-20 group"
+          >
+            {/* Visual Effects */}
+            <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent z-10" />
+            <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 via-transparent to-primary/20 rounded-[3rem] blur-3xl -z-10 group-hover:opacity-100 transition-opacity duration-1000" />
+            
+            <div className="relative rounded-[3rem] border border-white/10 overflow-hidden bg-[#050507] shadow-3xl">
+               <Image
+                src="/midnight-hero.png"
+                alt="NextStep AI Hero Dashboard"
+                width={1400}
+                height={800}
                 priority
+                className="w-full h-auto object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-1000"
               />
             </div>
-          </div>
-        </div>
+            
+            {/* Floating Stats or Badges */}
+            <motion.div 
+               animate={{ y: [0, -15, 0] }}
+               style={{ x: statsX, y: statsY }}
+               transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+               className="absolute -top-10 -left-10 hidden lg:flex items-center gap-4 p-6 glass rounded-3xl z-20 shadow-2xl"
+            >
+                <div className="p-3 bg-primary/20 rounded-2xl text-primary"><Target className="h-6 w-6" /></div>
+                <div>
+                  <p className="font-black text-white text-xl">98%</p>
+                  <p className="text-xs text-muted-foreground uppercase font-bold tracking-widest">Accuracy</p>
+                </div>
+            </motion.div>
+
+            <motion.div 
+               animate={{ y: [0, 15, 0] }}
+               style={{ x: statsX, y: statsY }}
+               transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+               className="absolute top-40 -right-12 hidden lg:flex items-center gap-4 p-6 glass rounded-3xl z-20 shadow-2xl"
+            >
+                <div className="p-3 bg-[#818cf8]/20 rounded-2xl text-[#818cf8]"><Zap className="h-6 w-6" /></div>
+                <div>
+                  <p className="font-black text-white text-xl">Adaptive</p>
+                  <p className="text-xs text-muted-foreground uppercase font-bold tracking-widest">Real-time learning</p>
+                </div>
+            </motion.div>
+          </motion.div>
+        </motion.div>
       </div>
     </section>
   );
